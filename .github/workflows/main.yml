@@ -76,7 +76,10 @@ jobs:
     - name: Build Docker image
       run: |
          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest .
-         
+
+    - name: Authenticate Snyk
+      run: snyk auth ${{ secrets.SNYK_TOKEN }}
+        
     - name: Scan Docker image 🐳
       uses: snyk/actions/docker@master
       continue-on-error: true
