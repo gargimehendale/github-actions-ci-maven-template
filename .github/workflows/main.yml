@@ -77,6 +77,20 @@ jobs:
       run: |
          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest .
          
+    - name: Scan Docker image 🐳
+      uses: snyk/actions/docker@master
+      continue-on-error: true
+      with:
+        image: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
+        args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+    - name: Upload Snyk report as sarif 📦
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: snyk.sarif
+              
     - name: Push Docker Image to docker Hub
       run: |
          docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
