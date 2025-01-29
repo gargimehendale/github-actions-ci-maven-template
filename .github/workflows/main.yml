@@ -44,12 +44,12 @@ on:
         required: true
       SNYK_TOKEN:
         required: true
-
+permissions:
+  security-events: write
+  
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
       with:
