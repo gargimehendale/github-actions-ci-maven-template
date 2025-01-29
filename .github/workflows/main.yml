@@ -42,6 +42,8 @@ on:
         required: true
       DOCKER_PASSWORD:
         required: true
+      SNYK_TOKEN:
+        required: true
 
 jobs:
   build:
