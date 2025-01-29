@@ -82,14 +82,14 @@ jobs:
       continue-on-error: true
       with:
         image: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
-        args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
+        args: --file=Dockerfile --severity-threshold=high 
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-    - name: Upload Snyk report as sarif 📦
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: snyk.sarif
+    # - name: Upload Snyk report as sarif 📦
+    #   uses: github/codeql-action/upload-sarif@v2
+    #   with:
+    #     sarif_file: snyk.sarif
               
     - name: Push Docker Image to docker Hub
       run: |
