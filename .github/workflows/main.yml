@@ -78,8 +78,9 @@ jobs:
          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest .
 
     - name: Debug Secrets
-      run: echo "SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} is set"
+      run: echo "$DOCKER_USERNAME is set"
       env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
     - name: Scan Docker image 🐳
