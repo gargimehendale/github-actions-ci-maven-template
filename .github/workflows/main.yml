@@ -44,11 +44,11 @@ on:
         required: true
       SNYK_TOKEN:
         required: true
-      JF_TOKEN:
+      JFROG_TOKEN:
         required: true
-      JF_URL: 
+      JFROG_URL: 
         required: true
-      JF_USERNAME:
+      JFROG_USERNAME:
         required: true
 permissions:
   security-events: write
@@ -105,7 +105,10 @@ jobs:
         JF_URL: ${{ secrets.JFROG_URL }}
         JF_USERNAME: ${{ secrets.JFROG_USERNAME }}
         JF_TOKEN: ${{ secrets.JFROG_TOKEN }}
-
+        
+    - name: Debug JFROG_URL
+      run: echo "JFROG_URL=${{ secrets.JFROG_URL }}"
+      
     - name: Validate JFrog Connection
       run: jf rt ping
         
