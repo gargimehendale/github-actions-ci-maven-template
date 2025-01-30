@@ -121,8 +121,8 @@ jobs:
          docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
     - name: Tag Image for JFrog
       run: |
-        docker tag ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ secrets.JFROG_URL }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
+         docker tag ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ secrets.JFROG_URL }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
     - name: Push Docker Image to JFrog
       run: |
-        docker push ${{ secrets.JFROG_URL }}/github-ci-docker/${{ inputs.docker_image_name }}:latest      
+         docker push ${{ secrets.JFROG_URL }}/github-ci-docker/${{ inputs.docker_image_name }}:latest      
     
