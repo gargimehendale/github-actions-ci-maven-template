@@ -116,10 +116,13 @@ jobs:
     #   uses: github/codeql-action/upload-sarif@v3
     #   with:
     #     sarif_file: snyk.sarif
-    - name: Push Docker Image to JFrog
-      run: |
-        jf rt u "target/${{ inputs.docker_image_name }}.jar" "github-ci-docker/${{ inputs.docker_image_name }}.jar"
-      #docker push ${{ secrets.JFROG_URL }}/docker/${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
     - name: Push Docker Image to docker Hub
       run: |
          docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
+    - name: Tag Image for JFrog
+      run: |
+        docker tag ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ secrets.ARTIFACTORY_URL }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
+    - name: Push Docker Image to JFrog
+      run: |
+        docker push ${{ secrets.ARTIFACTORY_URL }}/github-ci-docker/${{ inputs.docker_image_name }}:latest      #docker push ${{ secrets.JFROG_URL }}/docker/${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
+    
