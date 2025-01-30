@@ -44,11 +44,11 @@ on:
         required: true
       SNYK_TOKEN:
         required: true
-      JFROG_ARTIFACTORY_TOKEN:
+      JFROG_ENV_ARTIFACTORY_TOKEN:
         required: true
-      JFROG_URL: 
+      JFROG_ENV_URL: 
         required: true
-      JFROG_ARTIFACTORY_USERNAME:
+      JFROG_ENV_ARTIFACTORY_USERNAME:
         required: true
 permissions:
   security-events: write
@@ -102,9 +102,9 @@ jobs:
     - name: JFrog CLI Setup
       uses: jfrog/setup-jfrog-cli@v4
       env:
-        JFROG_URL: ${{ secrets.JFROG_URL }}
-        JFROG_ARTIFACTORY_USERNAME: ${{ secrets.JFROG_ARTIFACTORY_USERNAME }}
-        JFROG_ARTIFACTORY_TOKEN: ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
+        JFROG_ENV_URL: ${{ secrets.JFROG_URL }}
+        JFROG_ENV_ARTIFACTORY_USERNAME: ${{ secrets.JFROG_ARTIFACTORY_USERNAME }}
+        JFROG_ENV_ARTIFACTORY_TOKEN: ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
     - name: Upload JAR to JFrog Artifactory
       run: |
          jf rt u "target/*.jar" "github-ci-maven/example/"
