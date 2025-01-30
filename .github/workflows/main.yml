@@ -48,6 +48,8 @@ on:
         required: true
       JFROG_URL: 
         required: true
+      JFROG_ARTIFACTORY_USERNAME:
+        required: true
 permissions:
   security-events: write
   
@@ -101,6 +103,7 @@ jobs:
       uses: jfrog/setup-jfrog-cli@v4
       env:
         JFROG_URL: ${{ secrets.JFROG_URL }}
+        JFROG_ARTIFACTORY_USERNAME: ${{ secrets.JFROG_ARTIFACTORY_USERNAME }}
         JFROG_ARTIFACTORY_TOKEN: ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
     - name: Upload JAR to JFrog Artifactory
       run: |
