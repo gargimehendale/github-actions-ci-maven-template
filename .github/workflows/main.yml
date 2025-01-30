@@ -104,17 +104,14 @@ jobs:
       env:
         JF_URL: ${{ secrets.JFROG_URL }}
         JF_USERNAME: ${{ secrets.JFROG_USERNAME }}
-        JF_TOKEN: ${{ secrets.JFROG_TOKEN }}
-        
-    - name: Debug JFROG_URL
-      run: echo "JFROG_URL=${{ secrets.JFROG_URL }}"
+        JF_PASSWORD: ${{ secrets.JFROG_TOKEN }}
       
     - name: Validate JFrog Connection
       run: jf rt ping
         
     - name: Upload JAR to JFrog Artifactory
       run: |
-         jf rt u "target/*.jar" "github-ci-maven/example"
+         jf rt u "target/*.jar" "github-ci-maven/"
     # - name: Upload Snyk report as sarif 📦
     #   uses: github/codeql-action/upload-sarif@v3
     #   with:
