@@ -44,6 +44,10 @@ on:
         required: true
       SNYK_TOKEN:
         required: true
+      JFROG_ARTIFACTORY_TOKEN:
+        required: true
+      JFROG_URL: 
+        required: true
 permissions:
   security-events: write
   
@@ -92,11 +96,19 @@ jobs:
         args: --severity-threshold=high --sarif-file-output=snyk.sarif
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
+        
+    - name: JFrog CLI Setup
+      uses: jfrog/setup-jfrog-cli@v4
+      env:
+        JFROG_URL: ${{ secrets.JFROG_URL }}
+        JFROG_ARTIFACTORY_TOKEN: ${{ secrets.JFROG_ARTIFACTORY_TOKEN }}
+    - name: Upload JAR to JFrog Artifactory
+      run: |
+         jf rt u "target/*.jar" "github-ci-maven/example/"
     # - name: Upload Snyk report as sarif 📦
     #   uses: github/codeql-action/upload-sarif@v3
     #   with:
-        sarif_file: snyk.sarif
+    #     sarif_file: snyk.sarif
               
     - name: Push Docker Image to docker Hub
       run: |
