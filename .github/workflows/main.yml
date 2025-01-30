@@ -44,11 +44,11 @@ on:
         required: true
       SNYK_TOKEN:
         required: true
-      JFROG_TOKEN:
+      JF_TOKEN:
         required: true
-      JFROG_URL: 
+      JF_URL: 
         required: true
-      JFROG_USERNAME:
+      JF_USERNAME:
         required: true
 permissions:
   security-events: write
@@ -102,16 +102,16 @@ jobs:
     - name: JFrog CLI Setup
       uses: jfrog/setup-jfrog-cli@v4
       env:
-        JFROG_URL: ${{ secrets.JFROG_URL }}
-        JFROG_USERNAME: ${{ secrets.JFROG_USERNAME }}
-        JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
+        JF_URL: ${{ secrets.JFROG_URL }}
+        JF_USERNAME: ${{ secrets.JFROG_USERNAME }}
+        JF_TOKEN: ${{ secrets.JFROG_TOKEN }}
 
     - name: Validate JFrog Connection
-      run: jfrog rt ping
+      run: jf rt ping
         
     - name: Upload JAR to JFrog Artifactory
       run: |
-         jf rt u "target/*.jar" "github-ci-maven"
+         jf rt u "target/*.jar" "github-ci-maven/example"
     # - name: Upload Snyk report as sarif 📦
     #   uses: github/codeql-action/upload-sarif@v3
     #   with:
