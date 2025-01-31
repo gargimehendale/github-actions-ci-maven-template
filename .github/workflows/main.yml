@@ -63,13 +63,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Send Slack Notification - Build Started
-      uses: rtCamp/action-slack-notify@v2
+    # - name: Send Slack Notification - Build Started
+    #   uses: rtCamp/action-slack-notify@v2
+    #   env:
+    #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     message: "🚀 Build Started for Branch: *${{ inputs.branch }}*"
+    #     color: "#36a64f"
+    - name: Post a message in a channel
+      uses: slackapi/slack-github-action@v2.0.0
       with:
         webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        message: "🚀 Build Started for Branch: *${{ inputs.branch }}*"
-        color: "#36a64f"
-        
+        webhook-type: incoming-webhook
+        payload: |
+          text: "*GitHub Action started*: ${{ job.status }}"
+          blocks:
+            - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "GitHub Action: ${{ job.status }}"
+
     # - uses: actions/checkout@v4
     #   with:
     #     repository: ${{ github.repository }}
