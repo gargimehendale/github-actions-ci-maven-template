@@ -52,6 +52,8 @@ on:
         required: true
       JFROG_DOMAIN:
         required: true
+      JFROG_DOCKER_TOKEN:
+        required: true
 permissions:
   security-events: write
   
@@ -129,7 +131,7 @@ jobs:
       env:
         JF_URL: ${{ secrets.JFROG_URL }}
         JF_USER: ${{ secrets.JFROG_USERNAME }}
-        JF_PASSWORD: ${{ secrets.JFROG_TOKEN }}
+        JF_PASSWORD: ${{ secrets.JFROG_DOCKER_TOKEN }}
     - name: Push Docker Image to JFrog
       run: |
          docker push ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest      
