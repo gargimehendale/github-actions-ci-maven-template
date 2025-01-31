@@ -78,11 +78,6 @@ jobs:
         webhook-type: incoming-webhook
         payload: |
           text: "*GitHub Action started*: ${{ job.status }}"
-          blocks:
-            - type: "section"
-              text:
-                type: "mrkdwn"
-                text: "GitHub Action: ${{ job.status }}"
 
     # - uses: actions/checkout@v4
     #   with:
