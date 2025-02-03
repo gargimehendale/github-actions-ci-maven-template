@@ -91,7 +91,7 @@ jobs:
           HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
           HCP_ORGANIZATION_ID: ${{ secrets.HCP_ORGANIZATION_ID }}
         run: |
-          SECRET_VALUE=$(hcp vault-secrets secrets read --app github-ci-secrets --project $HCP_PROJECT_ID --secret TEST_SECRET )
+          SECRET_VALUE=$(hcp vault-secrets secrets read --app github-ci-secrets --project $HCP_PROJECT_ID)
           echo "SECRET_VALUE=${SECRET_VALUE}" >> $GITHUB_ENV
       - name: Set up secret file
         run: |
