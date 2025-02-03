@@ -79,13 +79,6 @@ jobs:
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt update && sudo apt install -y hcp jq
-
-      # - name: Authenticate with HCP Vault Secrets
-      #   env:
-      #     HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-      #     HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
-      #   run: |
-      #     hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       # - name: Retrieve Secret
       #   run: |
       #     SECRET_VALUE=$(hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET | jq -r '.secret.value')
@@ -101,7 +94,7 @@ jobs:
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       - name: Retrieve Secret
         run: |
-          hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET
+          hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET --verbose
           
     # - name: Post a message in a channel
     #   uses: slackapi/slack-github-action@v2.0.0
