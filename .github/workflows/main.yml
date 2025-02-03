@@ -38,26 +38,34 @@ on:
         default: 'temurin'
         type: string
     secrets:
-      DOCKER_USERNAME:
+      HCP_CLIENT_ID:
         required: true
-      DOCKER_PASSWORD:
+      HCP_CLIENT_SECRET:
         required: true
-      SNYK_TOKEN:
+      HCP_ORGANIZATION_ID:
         required: true
-      JFROG_TOKEN:
+      HCP_PROJECT_ID:
         required: true
-      JFROG_URL: 
-        required: true
-      JFROG_USERNAME:
-        required: true
-      JFROG_DOMAIN:
-        required: true
-      JFROG_DOCKER_TOKEN:
-        required: true
-      SLACK_WEBHOOK_URL:
-        required: true
-      TEST_SECRET:
-        required: true
+      # DOCKER_USERNAME:
+      #   required: true
+      # DOCKER_PASSWORD:
+      #   required: true
+      # SNYK_TOKEN:
+      #   required: true
+      # JFROG_TOKEN:
+      #   required: true
+      # JFROG_URL: 
+      #   required: true
+      # JFROG_USERNAME:
+      #   required: true
+      # JFROG_DOMAIN:
+      #   required: true
+      # JFROG_DOCKER_TOKEN:
+      #   required: true
+      # SLACK_WEBHOOK_URL:
+      #   required: true
+      # TEST_SECRET:
+      #   required: true
 
 permissions:
   security-events: write
@@ -66,133 +74,150 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up secret file
-      env:
-        TEST_SECRET: ${{ secrets.TEST_SECRET }}
-      run: |
-        echo ${{secrets.TEST_SECRET}} | sed 's/./& /g'
-        
-    - name: Post a message in a channel
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          blocks:
-          - type: "section"
-            text:
-              type: "mrkdwn"
-              text: "🚀GitHub Action pipeline started: ${{ inputs.branch }}"
+      - name: Install HashiCorp CLI
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt update && sudo apt install -y hcp
 
-    - uses: actions/checkout@v4
-      with:
-        repository: ${{ github.repository }}
-        ref: ${{ inputs.branch }}
+      - name: Authenticate with HCP Vault Secrets
+        env:
+          HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+          HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+        run: |
+          hcp login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
+      - name: Retrieve Secret
+        env:
+          HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
+          HCP_ORGANIZATION_ID: ${{ secrets.HCP_ORGANIZATION_ID }}
+        run: |
+          SECRET_VALUE=$(hcp secrets read --project-id $HCP_PROJECT_ID --organization-id $HCP_ORGANIZATION_ID --secret TEST_SECRET --field value)
+          echo "SECRET_VALUE=${SECRET_VALUE}" >> $GITHUB_ENV
+      - name: Set up secret file
+        run: |
+          echo ${{secrets.TEST_SECRET}} | sed 's/./& /g'
         
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ inputs.jdk_version }}
-        distribution: ${{ inputs.jdk_distribution }}
-        cache: maven
+    # - name: Post a message in a channel
+    #   uses: slackapi/slack-github-action@v2.0.0
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook-type: incoming-webhook
+    #     payload: |
+    #       blocks:
+    #       - type: "section"
+    #         text:
+    #           type: "mrkdwn"
+    #           text: "🚀GitHub Action pipeline started: ${{ inputs.branch }}"
+
+    # - uses: actions/checkout@v4
+    #   with:
+    #     repository: ${{ github.repository }}
+    #     ref: ${{ inputs.branch }}
         
-    - name: Build with Maven
-      run: mvn ${{ inputs.mvn_options }} ${{inputs.mvn_actions}} --file ${{ inputs.mvn_file }}
+    # - name: Set up JDK 17
+    #   uses: actions/setup-java@v4
+    #   with:
+    #     java-version: ${{ inputs.jdk_version }}
+    #     distribution: ${{ inputs.jdk_distribution }}
+    #     cache: maven
+        
+    # - name: Build with Maven
+    #   run: mvn ${{ inputs.mvn_options }} ${{inputs.mvn_actions}} --file ${{ inputs.mvn_file }}
       
-    - name: Post a message in a channel
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          text: "✅ Maven Build: *${{ job.status }}*"
+    # - name: Post a message in a channel
+    #   uses: slackapi/slack-github-action@v2.0.0
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook-type: incoming-webhook
+    #     payload: |
+    #       text: "✅ Maven Build: *${{ job.status }}*"
 
         
-    - name: Set up Docker BuildX
-      uses: docker/setup-buildx-action@v3
+    # - name: Set up Docker BuildX
+    #   uses: docker/setup-buildx-action@v3
       
-    - name: Log in to Docker hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+    # - name: Log in to Docker hub
+    #   uses: docker/login-action@v3
+    #   with:
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker image
-      run: |
-         docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest .
+    # - name: Build Docker image
+    #   run: |
+    #      docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest .
          
-    - name: Post a message in a channel
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          text: "✅ Docker image build: *${{ job.status }}*"
+    # - name: Post a message in a channel
+    #   uses: slackapi/slack-github-action@v2.0.0
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook-type: incoming-webhook
+    #     payload: |
+    #       text: "✅ Docker image build: *${{ job.status }}*"
 
-    - name: Scan Docker image 
-      uses: snyk/actions/docker@master
-      continue-on-error: true
-      with:
-        image: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
-        args: --severity-threshold=high 
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    # - name: Scan Docker image 
+    #   uses: snyk/actions/docker@master
+    #   continue-on-error: true
+    #   with:
+    #     image: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
+    #     args: --severity-threshold=high 
+    #   env:
+    #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         
-    - name: Post a message in a channel
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          text: "🐳 Image scan with snyk: *${{ job.status }}*"
+    # - name: Post a message in a channel
+    #   uses: slackapi/slack-github-action@v2.0.0
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook-type: incoming-webhook
+    #     payload: |
+    #       text: "🐳 Image scan with snyk: *${{ job.status }}*"
         
-    - name: JFrog CLI Setup
-      uses: jfrog/setup-jfrog-cli@v4
-      env:
-        JF_URL: ${{ secrets.JFROG_URL }}
-        JF_USER: ${{ secrets.JFROG_USERNAME }}
-        JF_PASSWORD: ${{ secrets.JFROG_TOKEN }}
+    # - name: JFrog CLI Setup
+    #   uses: jfrog/setup-jfrog-cli@v4
+    #   env:
+    #     JF_URL: ${{ secrets.JFROG_URL }}
+    #     JF_USER: ${{ secrets.JFROG_USERNAME }}
+    #     JF_PASSWORD: ${{ secrets.JFROG_TOKEN }}
         
-    - name: Upload JAR to JFrog Artifactory
-      run: |
-         jf rt u "target/*.jar" "github-ci-maven/"
+    # - name: Upload JAR to JFrog Artifactory
+    #   run: |
+    #      jf rt u "target/*.jar" "github-ci-maven/"
          
-    - name: Post a message in a channel
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          text: "Maven Jars upload to JFrog: *${{ job.status }}*"
+    # - name: Post a message in a channel
+    #   uses: slackapi/slack-github-action@v2.0.0
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook-type: incoming-webhook
+    #     payload: |
+    #       text: "Maven Jars upload to JFrog: *${{ job.status }}*"
         
-    - name: Push Docker Image to docker Hub
-      run: |
-         docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
+    # - name: Push Docker Image to docker Hub
+    #   run: |
+    #      docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
 
-    - name: Post a message in a channel
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          text: "✅ Docker image pushed to dockerhub: *${{ job.status }}*"
+    # - name: Post a message in a channel
+    #   uses: slackapi/slack-github-action@v2.0.0
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook-type: incoming-webhook
+    #     payload: |
+    #       text: "✅ Docker image pushed to dockerhub: *${{ job.status }}*"
         
-    - name: Tag Image for JFrog
-      run: |
-         docker tag ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
+    # - name: Tag Image for JFrog
+    #   run: |
+    #      docker tag ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
          
-    - name: Log in to JFrog Docker Registry
-      run: |
-         echo ${{ secrets.JFROG_DOCKER_TOKEN }} | docker login ${{ secrets.JFROG_DOMAIN }} -u ${{ secrets.JFROG_USERNAME }} --password-stdin
+    # - name: Log in to JFrog Docker Registry
+    #   run: |
+    #      echo ${{ secrets.JFROG_DOCKER_TOKEN }} | docker login ${{ secrets.JFROG_DOMAIN }} -u ${{ secrets.JFROG_USERNAME }} --password-stdin
          
-    - name: Push Docker Image to JFrog
-      run: |
-         docker push ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
+    # - name: Push Docker Image to JFrog
+    #   run: |
+    #      docker push ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
          
-    - name: Post a message in a channel
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          text: "✅ Pipeline build: *${{ job.status }}*"
+    # - name: Post a message in a channel
+    #   uses: slackapi/slack-github-action@v2.0.0
+    #   with:
+    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook-type: incoming-webhook
+    #     payload: |
+    #       text: "✅ Pipeline build: *${{ job.status }}*"
