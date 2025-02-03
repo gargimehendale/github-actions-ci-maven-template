@@ -85,7 +85,7 @@ jobs:
           HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
           HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
         run: |
-          hcp login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
+          hcp auth --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       - name: Retrieve Secret
         env:
           HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
