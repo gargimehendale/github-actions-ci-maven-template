@@ -94,7 +94,7 @@ jobs:
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       - name: Retrieve Secret
         run: |
-          SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets read --app github-ci-secrets SLACK_WEBHOOK_URL | grep 'Value:' | awk '{$1=""; print $0}' | xargs 
+          SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets read --app github-ci-secrets SLACK_WEBHOOK_URL | jq -r '.secret.value') 
           echo "SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}" >> $GITHUB_ENV
       - name: Post a message in a channel
         uses: slackapi/slack-github-action@v2.0.0
