@@ -94,25 +94,19 @@ jobs:
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       - name: Retrieve Secret
         run: |
-          hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET --debug
-
-      - name: Retrieve Secret
-        run: |
-          hcp vault-secrets secrets list --app github-ci-secrets 
-      - name: Retrieve Secret
-        run: |
-          hcp vault-secrets secrets read --app github-ci-secrets JFROG_USERNAME --debug
-    # - name: Post a message in a channel
-    #   uses: slackapi/slack-github-action@v2.0.0
-    #   with:
-    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-    #     webhook-type: incoming-webhook
-    #     payload: |
-    #       blocks:
-    #       - type: "section"
-    #         text:
-    #           type: "mrkdwn"
-    #           text: "🚀GitHub Action pipeline started: ${{ inputs.branch }}"
+          SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets read --app github-ci-secrets SLACK_WEBHOOK_URL | grep 'Value:' | awk '{$1=""; print $0}' | xargs 
+          echo "SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}" >> $GITHUB_ENV
+      - name: Post a message in a channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            blocks:
+            - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "🚀GitHub Action pipeline started: ${{ inputs.branch }}"
 
     # - uses: actions/checkout@v4
     #   with:
