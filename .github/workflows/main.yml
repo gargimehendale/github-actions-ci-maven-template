@@ -80,6 +80,19 @@ jobs:
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt update && sudo apt install -y hcp jq
 
+      # - name: Authenticate with HCP Vault Secrets
+      #   env:
+      #     HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+      #     HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+      #   run: |
+      #     hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
+      # - name: Retrieve Secret
+      #   run: |
+      #     SECRET_VALUE=$(hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET | jq -r '.secret.value')
+      #     echo "SECRET_VALUE=${SECRET_VALUE}" >> $GITHUB_ENV
+      # - name: Set up secret file
+      #   run: |
+      #     echo $GITHUB_ENV | sed 's/./& /g'
       - name: Authenticate with HCP Vault Secrets
         env:
           HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
@@ -88,12 +101,8 @@ jobs:
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       - name: Retrieve Secret
         run: |
-          SECRET_VALUE=$(hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET | jq -r '.secret.value')
-          echo "SECRET_VALUE=${SECRET_VALUE}" >> $GITHUB_ENV
-      - name: Set up secret file
-        run: |
-          echo $GITHUB_ENV | sed 's/./& /g'
-        
+          hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET
+          
     # - name: Post a message in a channel
     #   uses: slackapi/slack-github-action@v2.0.0
     #   with:
