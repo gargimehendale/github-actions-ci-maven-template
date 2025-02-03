@@ -95,7 +95,13 @@ jobs:
       - name: Retrieve Secret
         run: |
           hcp vault-secrets secrets read --app github-ci-secrets TEST_SECRET --debug
-          
+
+      - name: Retrieve Secret
+        run: |
+          hcp vault-secrets secrets list --app github-ci-secrets 
+      - name: Retrieve Secret
+        run: |
+          hcp vault-secrets secrets read --app github-ci-secrets JFROG_USERNAME --debug
     # - name: Post a message in a channel
     #   uses: slackapi/slack-github-action@v2.0.0
     #   with:
