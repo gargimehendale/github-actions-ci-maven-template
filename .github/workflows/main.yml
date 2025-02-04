@@ -100,6 +100,9 @@ jobs:
       - name: Retrieve Secret
         run: |
           hcp vault-secrets run env --app github-ci-secrets >> $GITHUB_ENV
+          for var in $(hcp vault-secrets run env --app github-ci-secrets | cut -d '=' -f1); do
+            echo "::add-mask::${!var}"
+          done
       # - name: Retrieve Secret
       #   run: |
       #     SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL | jq -r '.secret.value') 
