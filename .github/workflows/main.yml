@@ -94,6 +94,10 @@ jobs:
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       - name: Retrieve Secret
         run: |
+          hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL --format json
+          hcp vault-secrets run env | grep SLACK_WEBHOOK_URL
+      - name: Retrieve Secret
+        run: |
           hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL
       # - name: Retrieve Secret
       #   run: |
