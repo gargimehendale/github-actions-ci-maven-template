@@ -94,8 +94,9 @@ jobs:
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
       - name: Retrieve Secret
         run: |
-          hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL --format json
-          hcp vault-secrets run env --app github-ci-secrets | grep SLACK_WEBHOOK_URL
+          SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL --format json | jq -r '.static_version.value')
+          echo "SLACK_WEBHOOK_URL=$SLACK_WEBHOOK_URL" >> $GITHUB_ENV
+          hcp vault-secrets run env --app github-ci-secrets | grep JFROG_USERNAME
       # - name: Retrieve Secret
       #   run: |
       #     hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL
