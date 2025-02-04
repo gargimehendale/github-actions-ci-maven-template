@@ -92,14 +92,14 @@ jobs:
           HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
         run: |
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
-      - name: Retrieve Secret
-        run: |
-          SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL --format json | jq -r '.static_version.value')
-          echo "SLACK_WEBHOOK_URL=$SLACK_WEBHOOK_URL" >> $GITHUB_ENV
-          hcp vault-secrets run env --app github-ci-secrets | grep JFROG_USERNAME
       # - name: Retrieve Secret
       #   run: |
-      #     hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL
+      #     SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL --format json | jq -r '.static_version.value')
+      #     echo "SLACK_WEBHOOK_URL=$SLACK_WEBHOOK_URL" >> $GITHUB_ENV
+      #     hcp vault-secrets run env --app github-ci-secrets | grep JFROG_USERNAME
+      - name: Retrieve Secret
+        run: |
+          hcp vault-secrets run env --app github-ci-secrets >> $GITHUB_ENV
       # - name: Retrieve Secret
       #   run: |
       #     SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL | jq -r '.secret.value') 
@@ -116,17 +116,17 @@ jobs:
                 type: "mrkdwn"
                 text: "🚀GitHub Action pipeline started: ${{ inputs.branch }}"
 
-    # - uses: actions/checkout@v4
-    #   with:
-    #     repository: ${{ github.repository }}
-    #     ref: ${{ inputs.branch }}
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.branch }}
         
-    # - name: Set up JDK 17
-    #   uses: actions/setup-java@v4
-    #   with:
-    #     java-version: ${{ inputs.jdk_version }}
-    #     distribution: ${{ inputs.jdk_distribution }}
-    #     cache: maven
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.jdk_version }}
+          distribution: ${{ inputs.jdk_distribution }}
+          cache: maven
         
     # - name: Build with Maven
     #   run: mvn ${{ inputs.mvn_options }} ${{inputs.mvn_actions}} --file ${{ inputs.mvn_file }}
@@ -134,7 +134,7 @@ jobs:
     # - name: Post a message in a channel
     #   uses: slackapi/slack-github-action@v2.0.0
     #   with:
-    #     webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     webhook: ${{ env.SLACK_WEBHOOK_URL }}
     #     webhook-type: incoming-webhook
     #     payload: |
     #       text: "✅ Maven Build: *${{ job.status }}*"
@@ -143,11 +143,11 @@ jobs:
     # - name: Set up Docker BuildX
     #   uses: docker/setup-buildx-action@v3
       
-    # - name: Log in to Docker hub
-    #   uses: docker/login-action@v3
-    #   with:
-    #     username: ${{ secrets.DOCKER_USERNAME }}
-    #     password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
     # - name: Build Docker image
     #   run: |
