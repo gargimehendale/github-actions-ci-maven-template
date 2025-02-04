@@ -99,10 +99,10 @@ jobs:
       # - name: Retrieve Secret
       #   run: |
       #     hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL
-      - name: Retrieve Secret
-        run: |
-          SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL | jq -r '.secret.value') 
-          echo "SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}" >> $GITHUB_ENV
+      # - name: Retrieve Secret
+      #   run: |
+      #     SLACK_WEBHOOK_URL=$(hcp vault-secrets secrets open --app github-ci-secrets SLACK_WEBHOOK_URL | jq -r '.secret.value') 
+      #     echo "SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}" >> $GITHUB_ENV
       - name: Post a message in a channel
         uses: slackapi/slack-github-action@v2.0.0
         with:
