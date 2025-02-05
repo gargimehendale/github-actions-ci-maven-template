@@ -203,7 +203,7 @@ jobs:
         
       - name: Tag Image for JFrog
         run: |
-           docker tag ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
+           docker tag ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
          
       - name: Log in to JFrog Docker Registry
         run: |
