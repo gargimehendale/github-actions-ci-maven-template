@@ -123,6 +123,7 @@ jobs:
         run: mvn ${{ inputs.mvn_options }} ${{inputs.mvn_actions}} --file ${{ inputs.mvn_file }}
       
       - name: Post a message in a channel
+        if: always()
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
@@ -163,6 +164,7 @@ jobs:
           SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
         
       - name: Post a message in a channel
+        if: always()
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
@@ -182,6 +184,7 @@ jobs:
            jf rt u "target/*.jar" "github-ci-maven/"
          
       - name: Post a message in a channel
+        if: always()
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
@@ -194,6 +197,7 @@ jobs:
            docker push ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
   
       - name: Post a message in a channel
+        if: always()
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
@@ -214,17 +218,22 @@ jobs:
            docker push ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
            
       - name: Post a message in a channel
+        if: always()
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
             text: "${{ job.status == 'success' && '✅ Uploading image to JFrog: *SUCCESS*' || '❌ Uploading image to JFrog: *FAILED*' }}"
-         
+  notify:
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    steps:
       - name: Post a message in a channel
         uses: slackapi/slack-github-action@v2.0.0
         with:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "${{ job.status == 'success' && '✅ Pipeline build: *SUCCESS*' || '❌ Pipeline build: *FAILED*' }}"
+            text: "${{ needs.build.result == 'success' && '✅ Pipeline build: *SUCCESS*' || '❌ Pipeline build: *FAILED*' }}"
