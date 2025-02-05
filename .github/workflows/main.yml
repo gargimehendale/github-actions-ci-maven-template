@@ -93,7 +93,7 @@ jobs:
         id: retrieve_secret
         run: |
           hcp vault-secrets run env --app github-ci-secrets >> $GITHUB_ENV
-          slack_url=(hcp vault-secrets run env --app github-ci-secrets SLACK_WEBHOOK_URL | cut -d'=' -f2) 
+          slack_url=$(hcp vault-secrets run env --app github-ci-secrets SLACK_WEBHOOK_URL | cut -d'=' -f2) 
           while IFS='=' read -r key value; do
             echo "::add-mask::$key"
             echo "::add-mask::$value"
