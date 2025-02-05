@@ -73,6 +73,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      slack_webhook: ${{ steps.retrieve_secret.outputs.slack_webhook }}
     steps:
       - name: Install HashiCorp CLI
         run: |
@@ -88,12 +90,15 @@ jobs:
           hcp auth login --client-id $HCP_CLIENT_ID --client-secret $HCP_CLIENT_SECRET
      
       - name: Retrieve Secret
+        id: retrieve_secret
         run: |
           hcp vault-secrets run env --app github-ci-secrets >> $GITHUB_ENV
           while IFS='=' read -r key value; do
             echo "::add-mask::$key"
             echo "::add-mask::$value"
           done < <(hcp vault-secrets run env --app github-ci-secrets)
+          slack_webhook=$(grep SLACK_WEBHOOK_URL $GITHUB_ENV | cut -d'=' -f2)
+          echo "slack_webhook=$slack_webhook" >> $GITHUB_OUTPUT
 
       - name: Post a message in a channel
         uses: slackapi/slack-github-action@v2.0.0
@@ -233,7 +238,7 @@ jobs:
       - name: Post a message in a channel
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook: ${{ needs.build.outputs.slack_webhook }}
           webhook-type: incoming-webhook
           payload: |
             text: "${{ needs.build.result == 'success' && '✅ Pipeline build: *SUCCESS*' || '❌ Pipeline build: *FAILED*' }}"
