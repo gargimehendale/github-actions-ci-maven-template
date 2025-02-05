@@ -97,8 +97,9 @@ jobs:
             echo "::add-mask::$key"
             echo "::add-mask::$value"
           done < <(hcp vault-secrets run env --app github-ci-secrets)
-          slack_webhook=$(grep SLACK_WEBHOOK_URL $GITHUB_ENV)
-          echo "slack_webhook=$slack_webhook" >> $GITHUB_OUTPUT
+          slack_webhook=$(grep SLACK_WEBHOOK_URL $GITHUB_ENV
+          echo $slack_webhook
+      # echo "slack_webhook=$slack_webhook" >> $GITHUB_OUTPUT
 
   #     - name: Post a message in a channel
   #       uses: slackapi/slack-github-action@v2.0.0
