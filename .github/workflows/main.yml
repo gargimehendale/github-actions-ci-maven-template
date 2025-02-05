@@ -203,7 +203,7 @@ jobs:
         
       - name: Tag Image for JFrog
         run: |
-           docker tag ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
+           docker tag ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
          
       - name: Log in to JFrog Docker Registry
         run: |
@@ -211,7 +211,8 @@ jobs:
          
       - name: Push Docker Image to JFrog
         run: |
-           docker push ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
+           docker push ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
+           
       - name: Post a message in a channel
         uses: slackapi/slack-github-action@v2.0.0
         with:
