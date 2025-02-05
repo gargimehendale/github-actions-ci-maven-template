@@ -128,7 +128,7 @@ jobs:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "✅ Maven Build: *${{ job.status }}*"
+            text: "${{ job.status == 'success' && '✅ Maven Build: *SUCCESS*' || '❌ Maven Build: *FAILED*' }}"
 
         
       - name: Set up Docker BuildX
@@ -142,7 +142,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-           docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest .
+           docker build -t ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest .
+           
       - name: Post a message in Slack
         if: always()  # This ensures the message is sent whether the job passes or fails
         uses: slackapi/slack-github-action@v2.0.0
@@ -150,80 +151,79 @@ jobs:
           webhook: ${{ env.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "${{ job.status == 'success' && '✅ Docker image build:: *SUCCESS*' || 'Docker image build failed:: *FAILED*' }}"
-  
-      # - name: Post a message in a channel
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     webhook: ${{ env.SLACK_WEBHOOK_URL }}
-      #     webhook-type: incoming-webhook
-      #     payload: |
-      #       text: "✅ Docker image build: *${{ job.status }}*"
+            text: "${{ job.status == 'success' && '✅ Docker image build: *SUCCESS*' || '❌ Docker image build : *FAILED*' }}"
 
-      # - name: Scan Docker image 
-      #   uses: snyk/actions/docker@master
-      #   continue-on-error: true
-      #   with:
-      #     image: ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
-      #     args: --severity-threshold=high 
-      #   env: 
-      #     SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+      - name: Scan Docker image 
+        uses: snyk/actions/docker@master
+        continue-on-error: true
+        with:
+          image: ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest
+          args: --severity-threshold=high 
+        env: 
+          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
         
-      # - name: Post a message in a channel
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     webhook: ${{ env.SLACK_WEBHOOK_URL }}
-      #     webhook-type: incoming-webhook
-      #     payload: |
-      #       text: "🐳 Image scan with snyk: *${{ job.status }}*"
+      - name: Post a message in a channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "${{ job.status == 'success' && '✅ Snyk image scan: *SUCCESS*' || '❌ Snyk image scan: *FAILED*' }}"
         
-      # - name: JFrog CLI Setup
-      #   uses: jfrog/setup-jfrog-cli@v4
-      #   env:
-      #     JF_URL: ${{ env.JFROG_URL }}
-      #     JF_USER: ${{ env.JFROG_USERNAME }}
-      #     JF_PASSWORD: ${{ env.JFROG_TOKEN }}
+      - name: JFrog CLI Setup
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: ${{ env.JFROG_URL }}
+          JF_USER: ${{ env.JFROG_USERNAME }}
+          JF_PASSWORD: ${{ env.JFROG_TOKEN }}
         
-      # - name: Upload JAR to JFrog Artifactory
-      #   run: |
-      #      jf rt u "target/*.jar" "github-ci-maven/"
+      - name: Upload JAR to JFrog Artifactory
+        run: |
+           jf rt u "target/*.jar" "github-ci-maven/"
          
-      # - name: Post a message in a channel
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     webhook: ${{ env.SLACK_WEBHOOK_URL }}
-      #     webhook-type: incoming-webhook
-      #     payload: |
-      #       text: "Maven Jars upload to JFrog: *${{ job.status }}*"
+      - name: Post a message in a channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "${{ job.status == 'success' && '✅ Uploading Maven Jars to JFrog: *SUCCESS*' || '❌ Uploading Maven Jars to JFrog: *FAILED*' }}"
         
-      # - name: Push Docker Image to docker Hub
-      #   run: |
-      #      docker push ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
+      - name: Push Docker Image to docker Hub
+        run: |
+           docker push ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest 
   
-      # - name: Post a message in a channel
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     webhook: ${{ env.SLACK_WEBHOOK_URL }}
-      #     webhook-type: incoming-webhook
-      #     payload: |
-      #       text: "✅ Docker image pushed to dockerhub: *${{ job.status }}*"
+      - name: Post a message in a channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "${{ job.status == 'success' && '✅ Uploading image to Dockerhub: *SUCCESS*' || '❌ Uploading image to Dockerhub: *FAILED*' }}"
         
-      # - name: Tag Image for JFrog
-      #   run: |
-      #      docker tag ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
+      - name: Tag Image for JFrog
+        run: |
+           docker tag ${{ env.DOCKER_USERNAME }}/${{ inputs.docker_image_name }}:latest ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest
          
-      # - name: Log in to JFrog Docker Registry
-      #   run: |
-      #      echo ${{ env.JFROG_DOCKER_TOKEN }} | docker login ${{ env.JFROG_DOMAIN }} -u ${{ env.JFROG_USERNAME }} --password-stdin
+      - name: Log in to JFrog Docker Registry
+        run: |
+           echo ${{ env.JFROG_DOCKER_TOKEN }} | docker login ${{ env.JFROG_DOMAIN }} -u ${{ env.JFROG_USERNAME }} --password-stdin
          
-      # - name: Push Docker Image to JFrog
-      #   run: |
-      #      docker push ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
+      - name: Push Docker Image to JFrog
+        run: |
+           docker push ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
+      - name: Post a message in a channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "${{ job.status == 'success' && '✅ Uploading image to JFrog: *SUCCESS*' || '❌ Uploading image to JFrog: *FAILED*' }}"
          
-      # - name: Post a message in a channel
-      #   uses: slackapi/slack-github-action@v2.0.0
-      #   with:
-      #     webhook: ${{ env.SLACK_WEBHOOK_URL }}
-      #     webhook-type: incoming-webhook
-      #     payload: |
-      #       text: "✅ Pipeline build: *${{ job.status }}*"
+      - name: Post a message in a channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "${{ job.status == 'success' && '✅ Pipeline build: *SUCCESS*' || '❌ Pipeline build: *FAILED*' }}"
