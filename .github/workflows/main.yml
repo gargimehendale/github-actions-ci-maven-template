@@ -42,9 +42,6 @@ on:
         required: true
       HCP_CLIENT_SECRET:
         required: true
-
-permissions:
-  security-events: write
   
 jobs:
   build:
@@ -191,7 +188,7 @@ jobs:
          
       - name: Push Docker Image to JFrog
         run: |
-           docker push ${{ secrets.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
+           docker push ${{ env.JFROG_DOMAIN }}/github-ci-docker/${{ inputs.docker_image_name }}:latest  
            
       - name: Post a message in a channel
         if: always()
